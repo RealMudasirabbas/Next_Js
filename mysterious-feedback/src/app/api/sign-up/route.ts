@@ -1,8 +1,8 @@
-import dbConnect from '@/lib/db/dbConnect';
-import UserModel from '@/model/User.model';
-import bcryptjs from 'bcryptjs';
-import { sendVerificationEmail } from '@/helpers/sendVerificationEmail';
-import { ApiResponse } from '@/types/ApiResponse';
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User.model";
+import bcryptjs from "bcryptjs";
+import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
+import { ApiResponse } from "@/types/ApiResponse";
 
 export async function POST(request: Request) {
     try {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
             return Response.json(
                 {
                     success: true,
-                    message: 'Username is already taken',
+                    message: "Username is already taken",
                 },
                 { status: 400 },
             );
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
                     {
                         succcess: false,
                         message:
-                            'User already exists. Please provide another email.',
+                            "User already exists. Please provide another email.",
                     },
                     { status: 400 },
                 );
@@ -89,16 +89,16 @@ export async function POST(request: Request) {
         return Response.json(
             {
                 success: true,
-                message: 'User registered Successfuly.Please verify Your email',
+                message: "User registered Successfuly.Please verify Your email",
             },
             { status: 201 },
         );
     } catch (error) {
-        console.error('Error occur while registering the user', error);
+        console.error("Error occur while registering the user", error);
         return Response.json(
             {
                 success: false,
-                message: 'Registering a user failed',
+                message: "Registering a user failed",
             },
             { status: 500 },
         );

@@ -1,5 +1,6 @@
 import { NextResponse,NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
+import dbConnect from './lib/dbConnect'
 export {default} from "next-auth/middleware"
 
 export const config = {
@@ -13,7 +14,7 @@ export const config = {
 }
 
 export async function middleware(request: NextRequest) {
-
+    // await dbConnect()
     const token = await getToken({req:request});
     const url = request.nextUrl
     

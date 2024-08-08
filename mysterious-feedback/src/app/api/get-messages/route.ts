@@ -1,4 +1,4 @@
-import dbConnect from "@/lib/db/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
 import { User, getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
@@ -39,7 +39,6 @@ export async function GET(request: Request) {
         ]);
 
         if (!user || user.length === 0) {
-
             return Response.json(
                 {
                     success: false,
@@ -57,7 +56,7 @@ export async function GET(request: Request) {
             { status: 200 },
         );
     } catch (error) {
-        console.log("Error occured while trying to get user messages",error)
+        console.log("Error occured while trying to get user messages", error);
         return Response.json(
             {
                 success: false,

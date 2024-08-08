@@ -1,4 +1,4 @@
-import dbConnect from "@/lib/db/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
 import { User, getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
@@ -31,7 +31,6 @@ export async function Post(request: Request) {
             { new: true },
         );
         if (!updatedUser) {
-            
             return Response.json(
                 {
                     success: false,
@@ -45,11 +44,10 @@ export async function Post(request: Request) {
             {
                 success: true,
                 message: "user status to accept messages updated successfully",
-                updatedUser
+                updatedUser,
             },
             { status: 200 },
         );
-
     } catch (error) {
         console.log("failed to update user status to accept messages");
         return Response.json(
@@ -62,8 +60,7 @@ export async function Post(request: Request) {
     }
 }
 
-export async function GET(request:Request) {
-    
+export async function GET(request: Request) {
     await dbConnect();
 
     const session = await getServerSession(authOptions);
@@ -82,10 +79,8 @@ export async function GET(request:Request) {
     const userId = user._id;
 
     try {
-        
         const foundUser = await UserModel.findById(userId);
         if (!foundUser) {
-            
             return Response.json(
                 {
                     success: false,
@@ -102,9 +97,7 @@ export async function GET(request:Request) {
             },
             { status: 201 },
         );
-        
     } catch (error) {
-        
         return Response.json(
             {
                 success: false,

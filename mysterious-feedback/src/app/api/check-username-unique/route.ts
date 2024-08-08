@@ -1,4 +1,4 @@
-import dbConnect from "@/lib/db/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
 import { usernameValidation } from "@/schemas/signUpSchema";
 import { z } from "zod";
