@@ -1,6 +1,5 @@
 import { NextResponse,NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import dbConnect from './lib/dbConnect'
 export {default} from "next-auth/middleware"
 
 export const config = {
