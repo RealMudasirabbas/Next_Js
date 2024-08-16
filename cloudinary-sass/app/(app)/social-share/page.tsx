@@ -21,9 +21,9 @@ const socialFormats = {
 
 type SocialFormat = keyof typeof socialFormats;
 
-function SocialShare() {
+export default function SocialShare() {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-    const [selectFormat, setSelectFormat] = useState<SocialFormat>(
+    const [selectedFormat, setSelectedFormat] = useState<SocialFormat>(
         "Instagram Square (1:1)",
     );
     const [isUploading, setIsUploading] = useState(false);
@@ -34,27 +34,30 @@ function SocialShare() {
         if (uploadedImage) {
             setIsTransforming(true);
         }
-    }, [uploadedImage, selectFormat]);
+    }, [selectedFormat, uploadedImage]);
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+    const handleFileUpload = async (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        const file = event.target.files?.[0];
         if (!file) return;
         setIsUploading(true);
+        const formData = new FormData();
+        formData.append("file", file);
 
         try {
-            const formData = new FormData();
-            formData.append("file", file);
-
             const response = await fetch("/api/image-upload", {
                 method: "POST",
                 body: formData,
             });
 
-            if (!response.ok) {
-                throw new Error("Failed to upload image");
-            }
+            if (!response.ok) throw new Error("Failed to upload image");
+
+            const data = await response.json();
+            setUploadedImage(data.publicId);
         } catch (error) {
-            console.log("Error occurred while uploading image:", error);
+            console.log(error);
+            alert("Failed to upload image");
         } finally {
             setIsUploading(false);
         }
@@ -66,18 +69,20 @@ function SocialShare() {
         fetch(imageRef.current.src)
             .then((response) => response.blob())
             .then((blob) => {
-                const url = URL.createObjectURL(blob);
+                const url = window.URL.createObjectURL(blob);
                 const link = document.createElement("a");
                 link.href = url;
-                link.download = `${selectFormat
-                    .replace(/\+s/g, "_")
+                link.download = `${selectedFormat
+                    .replace(/\s+/g, "_")
                     .toLowerCase()}.png`;
                 document.body.appendChild(link);
                 link.click();
-                URL.revokeObjectURL(url);
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
                 document.body.removeChild(link);
             });
     };
+
     return (
         <div className="container mx-auto p-4 max-w-4xl">
             <h1 className="text-3xl font-bold mb-6 text-center">
@@ -114,9 +119,9 @@ function SocialShare() {
                             <div className="form-control">
                                 <select
                                     className="select select-bordered w-full"
-                                    value={selectFormat}
+                                    value={selectedFormat}
                                     onChange={(e) =>
-                                        setSelectFormat(
+                                        setSelectedFormat(
                                             e.target.value as SocialFormat,
                                         )
                                     }
@@ -143,17 +148,17 @@ function SocialShare() {
                                     )}
                                     <CldImage
                                         width={
-                                            socialFormats[selectFormat].width
+                                            socialFormats[selectedFormat].width
                                         }
                                         height={
-                                            socialFormats[selectFormat].height
+                                            socialFormats[selectedFormat].height
                                         }
                                         src={uploadedImage}
                                         sizes="100vw"
                                         alt="transformed image"
                                         crop="fill"
                                         aspectRatio={
-                                            socialFormats[selectFormat]
+                                            socialFormats[selectedFormat]
                                                 .aspectRatio
                                         }
                                         gravity="auto"
@@ -168,7 +173,7 @@ function SocialShare() {
                                     className="btn btn-primary"
                                     onClick={handleDownload}
                                 >
-                                    Download for {selectFormat}
+                                    Download for {selectedFormat}
                                 </button>
                             </div>
                         </div>
@@ -178,5 +183,3 @@ function SocialShare() {
         </div>
     );
 }
-
-export default SocialShare;
