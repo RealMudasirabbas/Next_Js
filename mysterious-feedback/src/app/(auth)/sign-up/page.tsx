@@ -44,6 +44,7 @@ function page() {
     useEffect(() => {
         const checkUsernameUnique = async () => {
             if (username) {
+                console.log("I am in Frontend",username);
                 setIsCheckingUsername(true);
                 setUsernameMessage("");
 
@@ -51,8 +52,8 @@ function page() {
                     const response = await axios.get(
                         `/api/check-username-unique?username=${username}`,
                     );
-                    // let message = response.data.message;
-                    setUsernameMessage(response.data.message);
+                    let message = response.data.message;
+                    setUsernameMessage(message);
                 } catch (error) {
                     const axiosError = error as AxiosError<ApiResponse>;
                     setUsernameMessage(
@@ -93,6 +94,8 @@ function page() {
                 description: errorMessage,
                 variant: "destructive",
             });
+            
+        } finally {
             setIsSubmitting(false);
         }
     };

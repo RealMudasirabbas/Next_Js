@@ -41,7 +41,7 @@ function verifyAccount() {
                 variant: "success",
             });
 
-            router.replace("sign-in");
+            router.replace("/sign-in");
         } catch (error) {
             console.error("Error in verification", error);
             const axiosError = error as AxiosError<ApiResponse>;

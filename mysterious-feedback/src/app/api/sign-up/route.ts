@@ -2,7 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
 import bcryptjs from "bcryptjs";
 import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
-import { ApiResponse } from "@/types/ApiResponse";
+
 
 export async function POST(request: Request) {
     try {
@@ -71,7 +71,6 @@ export async function POST(request: Request) {
         // send Verification Email
 
         const emailResponse = await sendVerificationEmail(
-            email,
             username,
             verifyCode,
         );

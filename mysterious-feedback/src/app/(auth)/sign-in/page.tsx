@@ -34,7 +34,7 @@ function page() {
         const result = await signIn("credentials", {
             redirect: false,
             identifier: data.identifier,
-            password: data.identifier,
+            password: data.password,
         });
 
         if (result?.error) {
@@ -43,6 +43,7 @@ function page() {
                     title: "Login Failed",
                     description: "Incorrect username or password",
                     variant: "destructive",
+                    duration: 3000,
                 });
             } else {
                 toast({

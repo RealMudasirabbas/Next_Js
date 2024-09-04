@@ -6,3 +6,8 @@ export interface ApiResponse {
     isAcceptingMessages?: boolean;
     messages?: Array<Message>
 }
+
+export interface suggestMessagesResponse {
+    success: boolean;
+    message: string;
+}

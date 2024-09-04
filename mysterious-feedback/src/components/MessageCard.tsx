@@ -30,18 +30,19 @@ type MessageCardProps = {
 
 function MessageCard({ message, onMessageDelete }: MessageCardProps) {
     
+    const { toast } = useToast();
 
     const handleDeleteConfirm = async () => {
-        const { toast } = useToast();
         try {
           const response = await axios.delete<ApiResponse>(`/api/delete-message/${message._id}`)
+          console.log(response.data)
           toast({
             title: response.data.message,
             description: "Message deleted successfully",
             variant: "destructive"
 
           }),
-          onMessageDelete(message._id)
+          onMessageDelete(message._id as string)
         } catch (error) {
           console.log("Error occured in deleting message", error);
           toast({
@@ -54,7 +55,7 @@ function MessageCard({ message, onMessageDelete }: MessageCardProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Card Title</CardTitle>
+                
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="destructive">
@@ -68,14 +69,13 @@ function MessageCard({ message, onMessageDelete }: MessageCardProps) {
                             </AlertDialogTitle>
                             <AlertDialogDescription>
                                 This action cannot be undone. This will
-                                permanently delete your account and remove your
-                                data from our servers.
+                                permanently delete your message.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                                onClick={() => handleDeleteConfirm}
+                                onClick={handleDeleteConfirm}
                             >
                                 Continue
                             </AlertDialogAction>
@@ -84,7 +84,7 @@ function MessageCard({ message, onMessageDelete }: MessageCardProps) {
                 </AlertDialog>
             </CardHeader>
             <CardContent>
-                <p>Card Content</p>
+                <p>{message.content}</p>
             </CardContent>
         </Card>
     );

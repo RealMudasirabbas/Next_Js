@@ -1,11 +1,10 @@
 "use client";
-import MessageCard from "@/components/MessageCard";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Message } from "@/model/User.model";
-import { acceptingMessageSchema } from "@/schemas/acceptingMessageSchema";
 import { ApiResponse } from "@/types/ApiResponse";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
@@ -14,118 +13,114 @@ import { User } from "next-auth";
 import { useSession } from "next-auth/react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { acceptingMessageSchema } from "@/schemas/acceptingMessageSchema";
+import MessageCard from "@/components/MessageCard";
 
-function Dashboard() {
+function UserDashboard() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isSwitchLoading, setIsSwitchLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSwitchLoading, setIsSwitchLoading] = useState(false);
+  const [profileUrl, setProfileUrl] = useState("");
+
   const { toast } = useToast();
 
   const handleDeleteMessage = (messageId: string) => {
-    setMessages(
-      messages.filter((message) => {
-        return message._id !== messageId;
-      })
-    );
+    setMessages(messages.filter((message) => message._id !== messageId));
   };
+
   const { data: session } = useSession();
+
   const form = useForm({
     resolver: zodResolver(acceptingMessageSchema),
   });
-  const { register, setValue, watch } = useForm();
+
+  const { register, watch, setValue } = form;
   const acceptMessages = watch("acceptMessages");
 
   const fetchAcceptMessages = useCallback(async () => {
+    setIsSwitchLoading(true);
     try {
-      setIsSwitchLoading(true);
       const response = await axios.get<ApiResponse>("/api/accept-messages");
-      setValue("acceptingMessages", response.data.isAcceptingMessages);
+      setValue("acceptMessages", response.data.isAcceptingMessages);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
       toast({
         title: "Error",
         description:
-          axiosError.response?.data.message ||
-          "Error occured while fetching user accepting messages status",
+          axiosError.response?.data.message ??
+          "Failed to fetch message settings",
         variant: "destructive",
       });
     } finally {
       setIsSwitchLoading(false);
     }
-  }, [setValue]);
+  }, [setValue, toast]);
 
-  const fetchMessages = useCallback(async (refresh: boolean = false) => {
-    setIsLoading(true);
-    setIsSwitchLoading(false);
-    try {
-      const response = await axios.get<ApiResponse>("/api/get-messages");
-      setMessages(response.data.messages || []);
-      if (refresh) {
-        toast({
-          title: "Refreshed Messages",
-          description: "show latestmessages",
-          variant: "success",
-        });
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiResponse>;
-      toast({
-        title: "Error",
-        description:
-          axiosError.response?.data.message ||
-          "Error occured while fetching user messages",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+  const fetchMessages = useCallback(
+    async (refresh: boolean = false) => {
+      setIsLoading(true);
       setIsSwitchLoading(false);
-    }
-  }, [setIsLoading,setMessages]);
+      try {
+        const response = await axios.get<ApiResponse>("/api/get-messages");
+        setMessages(response.data.messages || []);
+        if (refresh) {
+          toast({
+            title: "Refreshed Messages",
+            description: "Showing latest messages",
+          });
+        }
+      } catch (error) {
+        const axiosError = error as AxiosError<ApiResponse>;
+        toast({
+          title: "Error",
+          description:
+            axiosError.response?.data.message ?? "Failed to fetch messages",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+        setIsSwitchLoading(false);
+      }
+    },
+    [setIsLoading, setMessages, toast]
+  );
 
   useEffect(() => {
     if (!session || !session.user) return;
+
     fetchMessages();
     fetchAcceptMessages();
-  }, [session,setValue, fetchMessages, fetchAcceptMessages]);
+
+    // Set profile URL only on the client side
+    const baseUrl = `${window.location.protocol}//${window.location.host}`;
+    setProfileUrl(`${baseUrl}/u/${(session.user as User).username}`);
+  }, [session, setValue, toast, fetchAcceptMessages, fetchMessages]);
 
   const handleSwitchChange = async () => {
     try {
-      setIsSwitchLoading(true);
       const response = await axios.post<ApiResponse>("/api/accept-messages", {
-        acceptingMessages: !acceptMessages,
+        acceptMessages: !acceptMessages,
       });
-
-      setValue("acceptingMessages", response.data.isAcceptingMessages);
+      setValue("acceptMessages", !acceptMessages);
       toast({
-        title: "Success",
-        description: response.data.message,
-        variant: "success",
+        title: response.data.message,
+        variant: "default",
       });
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
       toast({
         title: "Error",
         description:
-          axiosError.response?.data.message ||
-          "Error occured while accepting messages",
+          axiosError.response?.data.message ??
+          "Failed to update message settings",
         variant: "destructive",
       });
-    } finally {
-      setIsSwitchLoading(false);
     }
+  };
 
+  if (!session || !session.user) {
+    return <div>Please sign in</div>;
   }
-
-  if(!session || !session.user){
-    return <div>
-      <p>Please login</p>
-    </div>
-  }
-
-  const { username } = session.user as User;
-
-  const baseUrl = `${window.location.protocol}//${window.location.host}`;
-  const profileUrl = `${baseUrl}/u/${username}`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(profileUrl);
@@ -140,7 +135,7 @@ function Dashboard() {
       <h1 className="text-4xl font-bold mb-4">User Dashboard</h1>
 
       <div className="mb-4">
-        <h2 className="text-lg font-semibold mb-2">Copy Your Unique Link</h2>{" "}
+        <h2 className="text-lg font-semibold mb-2">Copy Your Unique Link</h2>
         <div className="flex items-center">
           <input
             type="text"
@@ -183,7 +178,7 @@ function Dashboard() {
         {messages.length > 0 ? (
           messages.map((message) => (
             <MessageCard
-              key={message._id}
+              key={message._id as string}
               message={message}
               onMessageDelete={handleDeleteMessage}
             />
@@ -196,4 +191,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default UserDashboard;

@@ -1,68 +1,68 @@
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
-import { User, getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/options";
 import mongoose from "mongoose";
+import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-    await dbConnect();
+  await dbConnect();
 
-    const session = await getServerSession(authOptions);
-    const user: User = session?.user as User;
+  const session = await getServerSession(authOptions);
 
-    if (!session || session.user) {
-        return Response.json(
-            {
-                success: false,
-                message: "Not Authenticated",
-            },
-            { status: 401 },
-        );
+  if (!session || !session.user) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Not Authenticated",
+      },
+      { status: 401 }
+    );
+  }
+
+  const userId = new mongoose.Types.ObjectId(session.user._id);
+
+  try {
+    const user = await UserModel.aggregate([
+      {
+        $match: { _id: userId }, // Fixed field name
+      },
+      {
+        $unwind: "$messages",
+      },
+      {
+        $sort: { "messages.createdAt": -1 },
+      },
+      {
+        $group: { _id: "$_id", messages: { $push: "$messages" } },
+      },
+    ]);
+
+    if (!user || user.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User not found",
+        },
+        { status: 404 }
+      );
     }
 
-    const userId = new mongoose.Types.ObjectId(user._id);
-
-    try {
-        const user = await UserModel.aggregate([
-            {
-                $match: { id: userId },
-            },
-            {
-                $unwind: "$messages",
-            },
-            {
-                $sort: { "messages.createdAt": -1 },
-            },
-            {
-                $group: { _id: "$_id", messages: { $push: "$messages" } },
-            },
-        ]);
-
-        if (!user || user.length === 0) {
-            return Response.json(
-                {
-                    success: false,
-                    message: "User not found",
-                },
-                { status: 404 },
-            );
-        }
-
-        return Response.json(
-            {
-                success: true,
-                message: user[0].messages,
-            },
-            { status: 200 },
-        );
-    } catch (error) {
-        console.log("Error occured while trying to get user messages", error);
-        return Response.json(
-            {
-                success: false,
-                message: "Error occured while trying to get user messages",
-            },
-            { status: 501 },
-        );
-    }
+    return NextResponse.json(
+      {
+        success: true,
+        messages: user[0].messages,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error occurred while trying to get user messages", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Error occurred while trying to get user messages",
+      },
+      { status: 500 }
+    );
+  }
 }
