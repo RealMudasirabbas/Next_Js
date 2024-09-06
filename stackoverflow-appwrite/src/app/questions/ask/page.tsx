@@ -17,7 +17,7 @@ import {
   questionAttachmentBucket,
   questionCollection,
 } from "@/models/name";
-import  {Confetti}  from "@/components/magicui/confetti";
+import { Confetti } from "@/components/magicui/confetti";
 
 const LabelInputContainer = ({
   children,
@@ -63,7 +63,7 @@ const QuestionForm = ({ question }: { question?: Models.Document }) => {
       if (Date.now() > end) return;
 
       Confetti({
-        particleCount: 5,
+        particleCount: 30,
         angle: 60,
         spread: 55,
         startVelocity: 60,
@@ -72,7 +72,7 @@ const QuestionForm = ({ question }: { question?: Models.Document }) => {
       });
 
       Confetti({
-        particleCount: 5,
+        particleCount: 30,
         angle: 120,
         spread: 55,
         startVelocity: 60,
@@ -193,6 +193,7 @@ const QuestionForm = ({ question }: { question?: Models.Document }) => {
           placeholder="e.g. Is there an R function for finding the index of an element in a vector?"
           type="text"
           value={formData.title}
+          className="text-black font-medium"
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, title: e.target.value }))
           }
@@ -253,6 +254,7 @@ const QuestionForm = ({ question }: { question?: Models.Document }) => {
             <Input
               id="tag"
               name="tag"
+              className="text-black font-medium"
               placeholder="e.g. (java c objective-c)"
               type="text"
               value={tag}

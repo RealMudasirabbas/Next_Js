@@ -1,47 +1,36 @@
-export default function convertRelativeTimeToDate(date: Date) {
-    if (date.toString().toLowerCase() === "invalid date") {
-        return "";
-    }
+export default function convertRelativeTimeToDate(date: Date): string {
+  if (isNaN(date.getTime())) {
+    return ""; // Handle invalid date
+  }
 
-    const now = new Date();
+  const now = new Date();
+  const timeDifferenceInMilliseconds = now.getTime() - date.getTime();
+  const seconds = Math.floor(timeDifferenceInMilliseconds / 1000);
 
-    const timeDifferenceInMilliseconds = now.getTime() - date.getTime();
+  if (seconds < 10) {
+    return "just now";
+  }
 
-    const seconds = Math.floor(timeDifferenceInMilliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) {
+    return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+  }
 
-    if (seconds < 10) {
-        return "just now";
-    }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+  }
 
-    if (seconds > 60) {
-        return `${seconds} seconds ${seconds !== 1 ? "s" : ""} ago`;
-    }
+  const days = Math.floor(hours / 24);
+  if (days < 30) {
+    return `${days} day${days !== 1 ? "s" : ""} ago`;
+  }
 
-    const minutes = Math.floor(seconds / 1000);
+  const months = Math.floor(days / 30.44); // Average days per month
+  if (months < 12) {
+    return `${months} month${months !== 1 ? "s" : ""} ago`;
+  }
 
-    if (minutes < 60) {
-        return `${minutes} minutes ${minutes !== 1 ? "s" : ""} ago`;
-    }
-
-    const hours = Math.floor(minutes / 60);
-
-    if (hours < 24) {
-        return `${hours} minutes ${hours !== 1 ? "s" : ""} ago`;
-    }
-
-    const days = Math.floor(hours / 24);
-
-    if (days < 30) {
-        return `${days} days ${days !== 1 ? "s" : ""} ago`;
-    }
-
-    const months = Math.floor(days / 30.44);
-
-    if (months < 12) {
-        return `${months} months ${months !== 1 ? "s" : ""} ago`;
-    }
-
-    const years = Math.floor(months / 12);
-
-    return `${years} years ${years !== 1 ? "s" : ""} ago`;
+  const years = Math.floor(months / 12);
+  return `${years} year${years !== 1 ? "s" : ""} ago`;
 }
