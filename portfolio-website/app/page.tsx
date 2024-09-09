@@ -2,6 +2,7 @@ import React from "react";
 import { Hero } from "./components/Hero";
 import { FloatingNav } from "./components/ui/FloatingNav";
 import { FaHome } from "react-icons/fa";
+import Grid from "./components/Grid";
 
 function Home() {
   return (
@@ -17,6 +18,7 @@ function Home() {
           ]}
         />
         <Hero />
+        <Grid />
       </div>
     </main>
   );

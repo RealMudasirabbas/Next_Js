@@ -1,3 +1,4 @@
+
 import Pagination from "@/components/Pagination";
 import QuestionCard from "@/components/QuestionCard";
 import {
@@ -102,5 +103,7 @@ const Page = async ({
     return <div>Error fetching data. Please try again later.</div>;
   }
 };
+
+
 
 export default Page;
